@@ -4,7 +4,7 @@
 // @version      1.0
 // @description
 /*
-1. 优化 不用刷新页面也可以支持自动植入小助手，体验更好
+1. 优化 不用刷新页面也可以支持自动植入小助手，完成页面交互
 */
 // @author       Michael.tang
 // @match        http://ops.jyblife.com/*
@@ -19,6 +19,7 @@
 // @license      GPL-3.0-only
 // @grant        none
 // ==/UserScript==
+
 /**
  * 监听全局ajax事件
  */
@@ -218,12 +219,12 @@
     };
 
     var init = function() {
-        if (!sqlPageLock) {
+        if(!sqlPageLock) {
             return false;
         }
         sqlPageLock = false;
 
-        if ($('.reset-row-show').length <= 0) {
+        if($('.reset-row-show').length <= 0) {
             //事件触发
             $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>JSON展示&查询</span></button>');
             //事件触发
@@ -232,6 +233,8 @@
             //事件触发
             $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>全屏</span></button>');
         }
+
+
 
         //点击分页按钮也触发JSON展示
         $('body').undelegate('.ivu-page li', 'click');
@@ -348,10 +351,9 @@
                     }
 
                 }
-            } else if (e.detail.responseURL == 'http://ops.jyblife.com:8000/api/v1/query_worklf') { //检查页面
-                if (checkUrl()) {
-                    $("body").unbind('DOMNodeInserted').one("DOMNodeInserted",
-                    function(e) {
+            }else if(/^http?:\/\/ops\.jyblife\.com:\d*\/api\/v\d+\/query_worklf/.test(e.detail.responseURL)) {//检查页面
+                if(checkUrl()) {
+                    $("body").unbind('DOMNodeInserted').one("DOMNodeInserted", function (e){
                         e.stopPropagation();
                         init();
                     });
@@ -363,5 +365,7 @@
     function(e) {
         //console.log(e.detail.responseText); // XHR 返回的内容
     });
+
+
 
 })();
