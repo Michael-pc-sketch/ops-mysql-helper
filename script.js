@@ -227,7 +227,7 @@
         if($('.reset-row-show').length <= 0) {
             $('.ivu-card-bordered button span').each(function (){
                  if($(this).html() == '查询') {
-                     $(this).parent('button').remove();
+                     $(this).parent('button').css('display','none');
                  }
             });
             //事件触发
