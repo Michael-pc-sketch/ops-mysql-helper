@@ -22,18 +22,11 @@
 
 (function() {
     'use strict';
+
     var reg= /^http?:\/\/ops\.jyblife\.com\/#\/querypage*$/;
     if(!reg.test(location.href)){
         return false;
     }
-
-
-
-
-
-
-
-
 
 
 
