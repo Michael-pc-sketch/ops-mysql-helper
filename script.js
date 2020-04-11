@@ -4,7 +4,7 @@
 // @version      1.1
 // @description
 /*
-1. 优化 按钮样式
+1. 优化了按钮样式
 */
 // @author       Michael.tang
 // @match        http://ops.jyblife.com/*
@@ -225,6 +225,11 @@
         sqlPageLock = false;
 
         if($('.reset-row-show').length <= 0) {
+            $('.ivu-card-bordered button span').each(function (){
+                 if($(this).html() == '查询') {
+                     $(this).parent('button').remove();
+                 }
+            });
             //事件触发
             $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i></i> <span>JSON格式展示</span></button>');
             //事件触发
