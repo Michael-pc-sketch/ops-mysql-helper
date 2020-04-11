@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         OPS-mysql小助手
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      1.0
 // @description
 /*
-1. 优化了页面刚初始化时的点击 JSON展示 的展示速度
-2. 优化了分页时JSON展示的视觉效果
+1. 优化 不用刷新页面也可以支持自动植入小助手，完成页面交互
 */
 // @author       Michael.tang
 // @match        http://ops.jyblife.com/*
@@ -20,8 +19,6 @@
 // @license      GPL-3.0-only
 // @grant        none
 // ==/UserScript==
-
-
 
 /**
  * 监听全局ajax事件
@@ -115,60 +112,27 @@
 
     var $ = $ || window.$;
 
+    var checkUrl = function() {
+        var reg = /^http?:\/\/ops\.jyblife\.com\/#\/querypage*$/;
+        var reg1 = /^http?:\/\/ops\.jyblife\.com\/#\/order\/serach-sql*$/;
+        if (!reg.test(location.href) && !reg1.test(location.href)) {
+            return false;
+        }
+        return true;
+    };
 
-    var reg = /^http?:\/\/ops\.jyblife\.com\/#\/querypage*$/;
-    if (!reg.test(location.href)) {
-        return false;
-    }
-
-    var sqlPageLoad = false;
+    //sql页面锁
+    var sqlPageLock = true;
 
     //是否树形展示
     var treeShowBol = false;
 
-    var checkFormatEnter = function (str){
-        if(str.indexOf("Create Table") > -1 && str.indexOf("CREATE TABLE `") > -1) {
-             return true;
+    var checkFormatEnter = function(str) {
+        if (str.indexOf("Create Table") > -1 && str.indexOf("CREATE TABLE `") > -1) {
+            return true;
         }
         return false;
-/*         var ace_content = $('.ace_content').val();
-        console.log("ace_content==>" + ace_content);
-        if(/#\s*show\s+create\s+table/.test(ace_content)){
-            return false;
-        }else{
-            return true;
-        } */
     };
-
-    var xhr = new XMLHttpRequest();
-
-    //监听全局的ajax完成事件
-    window.addEventListener('ajaxReadyStateChange',
-    function(e) {
-        //console.log(e.detail);
-        //如果加载完成
-        if (e.detail.readyState == 4) {
-            if (/^http?:\/\/ops\.jyblife\.com:\d*\/api\/v\d+\/search$/.test(e.detail.responseURL)) {
-                if (e.detail.responseText) {
-                    if (treeShowBol) {
-                        var responseText = e.detail.responseText;
-                        if(checkFormatEnter(responseText)) {
-                            responseText = e.detail.responseText.replace(/\\n/g,"<br />&nbsp;&nbsp;&nbsp;&nbsp;");
-                        }
-                        responseText = JSON.parse(responseText);
-                        showTreeFunc(responseText);
-                        $('.ivu-page').css('display','none');
-                    }
-
-                }
-            }
-        }
-    });
-    window.addEventListener('ajaxAbort',
-    function(e) {
-        //console.log(e.detail.responseText); // XHR 返回的内容
-    });
-
 
     //组装树形数据 new
     var newJoinTreeData = function(responseText) {
@@ -196,7 +160,6 @@
         }
         return fullArr;
     };
-
 
     //组装树形数据
     var joinTreeData = function() {
@@ -238,9 +201,9 @@
 
         var fullArr = newJoinTreeData(data);
         //var fullArr = joinTreeData();
-        if(checkFormatEnter(JSON.stringify(data))) {
+        if (checkFormatEnter(JSON.stringify(data))) {
             $('#out_pre').html(JSON.stringify(fullArr, null, 2) + "\n\n\n\n共：" + data.len + "条结果");
-        }else{
+        } else {
             $('#out_pre').text(JSON.stringify(fullArr, null, 2) + "\n\n\n\n共：" + data.len + "条结果");
         }
     };
@@ -255,16 +218,26 @@
         });
     };
 
-    window.onload = function() {
-        //事件触发
-        $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>JSON展示&查询</span></button>');
-        //事件触发
-        $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>重置为行展示&查询</span></button>');
+    var init = function() {
+        if(!sqlPageLock) {
+            return false;
+        }
+        sqlPageLock = false;
 
-        //事件触发
-        $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>全屏</span></button>');
+        if($('.reset-row-show').length <= 0) {
+            //事件触发
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>JSON展示&查询</span></button>');
+            //事件触发
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>重置为行展示&查询</span></button>');
+
+            //事件触发
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>全屏</span></button>');
+        }
+
+
 
         //点击分页按钮也触发JSON展示
+        $('body').undelegate('.ivu-page li', 'click');
         $('body').delegate('.ivu-page li', 'click',
         function() {
             if (treeShowBol) {
@@ -274,6 +247,7 @@
             }
         });
 
+        $('body').undelegate('.tree-show', 'click');
         $('body').delegate('.tree-show', 'click',
         function() {
             treeShowBol = true;
@@ -281,6 +255,7 @@
         });
 
         //普通展示
+        $('body').undelegate('.ivu-card-body .ivu-btn.ivu-btn-success', 'click');
         $('body').delegate('.ivu-card-body .ivu-btn.ivu-btn-success', 'click',
         function() {
             try {
@@ -290,8 +265,10 @@
                 display: "block"
             });
             //分页组件展示
-            $('.ivu-page').css('display','block');
+            $('.ivu-page').css('display', 'block');
         });
+
+        $('body').undelegate('.reset-row-show', 'click');
         $('body').delegate('.reset-row-show', 'click',
         function() {
             treeShowBol = false;
@@ -299,6 +276,7 @@
         });
 
         //全屏展示
+        $('body').undelegate('.full-screen', 'click');
         $('body').delegate('.full-screen', 'click',
         function() {
             if ($(this).find('span').text() == '全屏') {
@@ -349,6 +327,45 @@
                 $(this).find('span').text('全屏');
             }
         });
-    }
+        sqlPageLock = true;
+    };
+
+    var xhr = new XMLHttpRequest();
+
+    //监听全局的ajax完成事件
+    window.addEventListener('ajaxReadyStateChange',
+    function(e) {
+        //console.log(e.detail);
+        //如果加载完成
+        if (e.detail.readyState == 4) {
+            if (/^http?:\/\/ops\.jyblife\.com:\d*\/api\/v\d+\/search$/.test(e.detail.responseURL)) {
+                if (e.detail.responseText) {
+                    if (treeShowBol) {
+                        var responseText = e.detail.responseText;
+                        if (checkFormatEnter(responseText)) {
+                            responseText = e.detail.responseText.replace(/\\n/g, "<br />&nbsp;&nbsp;&nbsp;&nbsp;");
+                        }
+                        responseText = JSON.parse(responseText);
+                        showTreeFunc(responseText);
+                        $('.ivu-page').css('display', 'none');
+                    }
+
+                }
+            }else if(/^http?:\/\/ops\.jyblife\.com:\d*\/api\/v\d+\/query_worklf/.test(e.detail.responseURL)) {//检查页面
+                if(checkUrl()) {
+                    $("body").unbind('DOMNodeInserted').one("DOMNodeInserted", function (e){
+                        e.stopPropagation();
+                        init();
+                    });
+                }
+            }
+        }
+    });
+    window.addEventListener('ajaxAbort',
+    function(e) {
+        //console.log(e.detail.responseText); // XHR 返回的内容
+    });
+
+
 
 })();
