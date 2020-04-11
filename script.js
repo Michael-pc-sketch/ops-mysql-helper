@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         OPS-mysql小助手
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  OPS-mysql小助手
 // @author       Michael.tang
 // @match        http://ops.jyblife.com/*
@@ -27,8 +27,6 @@
         return false;
     }
 
-    var default_selected_database = "db_jyb";
-
 
 
 
@@ -51,7 +49,7 @@
         });
         var valList = [];
 
-        $('.ivu-table-body.ivu-table-overflowX table tbody tr').each(function (){
+        $('.ivu-table-body table tbody tr').each(function (){
             var tmpArr = [];
             $(this).find('td span').each(function(sub){
                 tmpArr.push($(this).html());
@@ -68,6 +66,8 @@
             }
             fullArr.push(tmpMap);
         }
+        console.log("keyList:" + JSON.stringify(keyList));
+        console.log("valList:" + JSON.stringify(valList));
         return fullArr;
     };
 
@@ -79,6 +79,7 @@
         $('.ivu-table-wrapper').after('<pre id="out_pre"></pre>');
 
         var fullArr = joinTreeData();
+        console.log(JSON.stringify(fullArr));
         $('#out_pre').text(JSON.stringify(fullArr, null, 2));
     };
 
@@ -136,13 +137,6 @@
         //全屏展示
         $('body').delegate('.full-screen' , 'click' , function (){
             if($(this).find('span').text() == '全屏') {
-                /*setTimeout(function (){
-                    $('.ivu-tree-title').each(function (){
-                        if($(this).html() == default_selected_database) {
-                            $(this).trigger('click');
-                        }
-                    });
-                } , 1500);*/
 
                 $('.main-header-con').css('display','none');
                 $('.sidebar-menu-con').css('display','none');
