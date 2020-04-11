@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         OPS-mysql小助手
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description
 /*
-1. 优化 不用刷新页面也可以支持自动植入小助手，完成页面交互
+1. 优化 按钮样式
 */
 // @author       Michael.tang
 // @match        http://ops.jyblife.com/*
@@ -226,12 +226,12 @@
 
         if($('.reset-row-show').length <= 0) {
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>JSON展示&查询</span></button>');
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i></i> <span>JSON格式展示</span></button>');
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>重置为行展示&查询</span></button>');
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i></i> <span>行格式展示</span></button>');
 
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i class="ivu-icon ivu-icon-md-backspace"></i> <span>全屏</span></button>');
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i></i> <span>全屏</span></button>');
         }
 
 
