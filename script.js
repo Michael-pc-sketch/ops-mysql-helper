@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         OPS-mysql小助手
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.3
 // @description
 /*
 1. 优化了按钮样式
@@ -200,11 +200,12 @@
         $('.ivu-table-wrapper').after('<pre id="out_pre" style="color:#00FF7F;background-color:black;"></pre>');
 
         var fullArr = newJoinTreeData(data);
-        //var fullArr = joinTreeData();
+        var fullArrStr = JSON.stringify(fullArr, null, 4);
+        $('#out_pre').attr('val' , fullArrStr);
         if (checkFormatEnter(JSON.stringify(data))) {
-            $('#out_pre').html(JSON.stringify(fullArr, null, 2) + "\n\n\n\n共：" + data.len + "条结果");
+            $('#out_pre').html(fullArrStr + "\n\n\n\n共：" + data.len + "条结果");
         } else {
-            $('#out_pre').text(JSON.stringify(fullArr, null, 2) + "\n\n\n\n共：" + data.len + "条结果");
+            $('#out_pre').text(fullArrStr + "\n\n\n\n共：" + data.len + "条结果");
         }
     };
 
@@ -217,6 +218,8 @@
             display: "block"
         });
     };
+
+
 
     var init = function() {
         if(!sqlPageLock) {
@@ -231,12 +234,13 @@
                  }
             });
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i></i> <span>JSON格式展示</span></button>');
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:black;border-color:black;font-weight:bolder;" type="button" class="ivu-btn ivu-btn-primary tree-show"><!----> <i></i> <span>JSON格式展示</span></button>');
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i></i> <span>行格式展示</span></button>');
-
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:black;border-color:black;font-weight:bolder;" type="button" class="ivu-btn ivu-btn-primary reset-row-show"><!----> <i></i> <span>行格式展示</span></button>');
             //事件触发
-            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:#C16BFA;border-color:#C16BFA;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i></i> <span>全屏</span></button>');
+            //$('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:black;border-color:black;font-weight:bolder;" type="button" class="ivu-btn ivu-btn-primary copy-tree-data"><!----> <i></i> <span>复制JSON数据</span></button>');
+            //事件触发
+            $('.ivu-card-body button').last().after('<button style="margin-left:5px;background-color:black;border-color:black;font-weight:bolder;" type="button" class="ivu-btn ivu-btn-primary full-screen"><!----> <i></i> <span>全屏</span></button>');
         }
 
 
@@ -252,12 +256,21 @@
             }
         });
 
+        //JSON展示
         $('body').undelegate('.tree-show', 'click');
         $('body').delegate('.tree-show', 'click',
         function() {
             treeShowBol = true;
             $('.ivu-card-body .ivu-btn.ivu-btn-success').trigger('click');
         });
+
+        //复制JSON数据
+        $('body').undelegate('.copy-tree-data', 'click');
+        $('body').delegate('.copy-tree-data', 'click',
+        function() {
+            try{window.copy("12388");alert("复制成功");}catch(e){alert(e);}
+        });
+        //window.clipboardData.setData("Text",clipBoardContent);
 
         //普通展示
         $('body').undelegate('.ivu-card-body .ivu-btn.ivu-btn-success', 'click');
